@@ -9,11 +9,27 @@ using namespace std;
 #define M_PI 3.141592654
 #endif // !M_PI
 
+#define MAX_JAW_ANGLE 0
+#define MIN_JAW_ANGLE -42
+
+#define MAX_NECKLE_ANGLE 20
+#define MIN_NECKLE_ANGLE -20
+
 #define MAX_THIGH_ANGLE 70
 #define MIN_THIGH_ANGLE 0
 
+#define MAX_TAIL_Z_ANGLE 5
+#define MIN_TAIL_Z_ANGLE -5
+
+#define MAX_TAIL_Y_ANGLE 25
+#define MIN_TAIL_Y_ANGLE -25
+
+
+
+
+
 float xtp = 0.0, ytp = 0.0, ztp = 0.0, xrp = 0.0, yrp = 0.0, zrp = 0.0, xt = 0.0, yt = 0.0, zt = 0.0, xr = 0.0, yr = 0.0, zr = 0.0;
-float thighAngle = 9, legAngle = 50, footAngle = -26, chestAngle = 8, neckAngle = 8,
+float thighAngle = 9, legAngle = 50, footAngle = -26, chestAngle = 8, neckleAngle = 8,
 upperHandAngle = 8, lowerHandAngle = 8, headAngleX = 0.0, headAngleY = 0.0, headAngleZ = -16.0, jawAngle = 0.0, tailAngleZ = 0.0, tailAnngleY = 0.0;
 
 void
@@ -84,47 +100,10 @@ Box(float width, float height, float depth, char solid)
 	}
 }
 
-void Cylinder(float radius, float length, int slices)
-{
-	float halfLength = length / 2;
-	for (int i = 0; i<slices; i++) {
-		float theta = ((float)i)*2.0*M_PI;
-		float nextTheta = ((float)i + 1)*2.0*M_PI;
-		glBegin(GL_TRIANGLE_STRIP);
-		/*vertex at middle of end */ glVertex3f(0.0, halfLength, 0.0);
-		/*vertices at edges of circle*/ glVertex3f(radius*cos(theta), halfLength, radius*sin(theta));
-		glVertex3f(radius*cos(nextTheta), halfLength, radius*sin(nextTheta));
-		/* the same vertices at the bottom of the cylinder*/
-		glVertex3f(radius*cos(nextTheta), -halfLength, radius*sin(nextTheta));
-		glVertex3f(radius*cos(theta), -halfLength, radius*sin(theta));
-		glVertex3f(0.0, -halfLength, 0.0);
-		glEnd();
-	}
-}
 
-void drawHead(char solid)
-{
-	glTranslatef(0.6, 0.0, 0.0);
-	glRotatef(headAngleX, 1, 0, 0);
-	glRotatef(headAngleY, 0, 1, 0);
-	glRotatef(headAngleZ, 0, 0, 1);
-	glTranslatef(0.6, 0.0, 0.0);
-	Box(1.4, 1.25, 1.25, solid);
-
-	glPushMatrix();// jaw
-	glTranslatef(1.3, 0.0, 0.0);
-	Box(1.25, 0.5, 1.0, solid);
-
-	glTranslatef(-0.7, -0.5, 0.0);
-	glRotatef(jawAngle, 0, 0, 1);
-	glTranslatef(0.5, 0.15, 0.0);
-	Box(1.2, 0.3, 0.7, solid);
-	glPopMatrix();
-}
 
 void drawLeg(bool isLeft, char solid)
 {
-	glPushMatrix(); // draw thigh
 	if (isLeft)
 		glTranslatef(-0.3, -0.7, -0.9);
 	else
@@ -155,33 +134,11 @@ void drawLeg(bool isLeft, char solid)
 	glPopMatrix(); // end of draw leg
 
 	glPopMatrix();
-
-	glPopMatrix(); // end of draw thigh
-}
-
-void drawHand(bool isLeft, char solid)
-{
-	glPushMatrix(); // draw hand
-	if (isLeft)
-		glTranslatef(0.1, -0.5, -0.7);
-	else
-		glTranslatef(0.1, -0.5, 0.7);
-
-	glRotatef(upperHandAngle, 0, 0, 1);
-	glTranslatef(0.0, -0.25, 0.0);
-	Box(0.3, 0.6, 0.3, solid);
-
-	glPushMatrix();
-	glTranslatef(0.1, -0.1, 0.0);
-	glRotatef(lowerHandAngle, 0, 0, 1);
-	glTranslatef(0.0, -0.2, 0.0);
-	Box(0.15, 0.3, 0.3, solid);
-	glPopMatrix();
-	glPopMatrix();
 }
 
 void drawBackwardBody(float width, float height, float depth, char solid)
 {
+	glTranslatef(-1.0, 0.0, 0.0);
 	for (unsigned char i = 0; i < 5; i++)
 	{
 		glPushMatrix();
@@ -208,9 +165,108 @@ void drawBackwardBody(float width, float height, float depth, char solid)
 	}
 }
 
+void drawJaw(char solid)
+{
+	glTranslatef(1.3, 0.0, 0.0);
+	Box(1.25, 0.5, 1.0, solid);
+
+	glTranslatef(-0.7, -0.5, 0.0);
+	glRotatef(jawAngle, 0, 0, 1);
+	glTranslatef(0.5, 0.15, 0.0);
+	Box(1.2, 0.3, 0.7, solid);
+}
+
+void drawHead(char solid)
+{
+	glTranslatef(0.6, 0.0, 0.0);
+	glRotatef(headAngleX, 1, 0, 0);
+	glRotatef(headAngleY, 0, 1, 0);
+	glRotatef(headAngleZ, 0, 0, 1);
+	glTranslatef(0.6, 0.0, 0.0);
+	Box(1.4, 1.25, 1.25, solid);
+
+	glPushMatrix();// jaw
+	drawJaw(solid);
+	glPopMatrix();
+}
+
+void drawNeckle(char solid)
+{
+	glTranslatef(0.5, 0.1, 0.0);
+	glRotatef(neckleAngle, 0, 0, 1);
+	glTranslatef(0.7, 0.0, 0.0);
+	Box(1.4, 1.2, 1.2, solid);
+
+	glPushMatrix();
+	drawHead(solid);
+	glPopMatrix();
+}
+
+void drawHand(bool isLeft, char solid)
+{
+	if (isLeft)
+		glTranslatef(0.1, -0.5, -0.7);
+	else
+		glTranslatef(0.1, -0.5, 0.7);
+
+	glRotatef(upperHandAngle, 0, 0, 1);
+	glTranslatef(0.0, -0.25, 0.0);
+	Box(0.3, 0.6, 0.3, solid);
+
+	glPushMatrix();
+	glTranslatef(0.1, -0.1, 0.0);
+	glRotatef(lowerHandAngle, 0, 0, 1);
+	glTranslatef(0.0, -0.2, 0.0);
+	Box(0.15, 0.3, 0.3, solid);
+	glPopMatrix();
+}
+
+void drawUpperBody(char solid)
+{
+	glTranslatef(0.7, 0.0, 0.0);
+	glRotatef(chestAngle, 0, 0, 1.0);
+	glTranslatef(0.5, 0.0, 0.0);
+	Box(1.4, 1.4, 1.4, solid);
+
+	glPushMatrix();
+	drawHand(true, solid);
+	glPopMatrix();
+
+	glPushMatrix();
+	drawHand(false, solid);
+	glPopMatrix();
+
+	glPushMatrix(); // draw neckle
+	drawNeckle(solid);
+	glPopMatrix();
+}
+
+void drawTrex(char solid)
+{
+	// Base body
+	glColor3f(0.8, 0.5, 0.25);
+	Box(2.0, 1.5, 1.5, solid);
+
+	glPushMatrix();
+	drawLeg(false, solid);
+	glPopMatrix();
+
+	glPushMatrix();
+	drawLeg(true, solid);
+	glPopMatrix();
+
+	glPushMatrix(); // draw upper body
+	drawUpperBody(solid);
+	glPopMatrix();
+
+	glPushMatrix();
+	drawBackwardBody(1.5, 1.5, 1.5, solid);
+	glPopMatrix();
+}
+
 void display(void)
 {
-	float solid = 1;
+	float solid = 0;
 
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -229,39 +285,7 @@ void display(void)
 	zt = 0;
 
 	glPushMatrix();
-	// Base body
-	glColor3f(1.0, 1.0, 1.0);
-	Box(2.0, 1.5, 1.5, solid);
-
-	drawLeg(false, 1);
-	drawLeg(true, 1);
-
-	glPushMatrix(); // draw chest
-	glTranslatef(0.7, 0.0, 0.0);
-	glRotatef(chestAngle, 0, 0, 1.0);
-	glTranslatef(0.5, 0.0, 0.0);
-	Box(1.4, 1.4, 1.4, solid);
-
-	drawHand(true, 1);
-	drawHand(false, 1);
-
-	glPushMatrix(); // draw neckle
-	glTranslatef(0.5, 0.1, 0.0);
-	glRotatef(neckAngle, 0, 0, 1);
-	glTranslatef(0.7, 0.0, 0.0);
-	Box(1.4, 1.2, 1.2, solid);
-
-	glPushMatrix();
-	drawHead(solid);
-	glPopMatrix();
-
-	glPopMatrix();
-
-	glPopMatrix();
-
-	glTranslatef(-1.0, 0.0, 0.0);
-	drawBackwardBody(1.5, 1.5, 1.5, solid);
-
+	drawTrex(solid);
 	glPopMatrix();
 
 	glFlush();
